@@ -1,0 +1,57 @@
+---
+title: "lab1"
+output: rmarkdown::github_document
+date: "2023-08-02"
+---
+
+```{r setup, include=FALSE}
+library(readxl)
+library(dplyr)
+library(lubridate)
+library(readr)
+```
+
+### 1
+```{r cache=TRUE}
+paths = list.files()[grepl('.xlsx', list.files())]
+
+read_excel_file <- function(file_path) {
+  df <- read_xlsx(file_path)
+  df$mes = substr(file_path, 1, 2)
+  df$ano = substr(file_path, 4, 7)
+  return(df)
+}
+
+data_frames <- lapply(paths, read_excel_file)
+
+combined_data <- bind_rows(data_frames)
+combined_data = combined_data[,-ncol(combined_data)]
+dim(combined_data)
+head(combined_data)
+write.csv2(combined_data, 'combined_data.csv')
+```
+
+### 2
+```{r}
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+
+
+
+modas = unlist(lapply(select(combined_data, c(UBICACION, PILOTO, UNIDAD)), getmode))
+
+print(modas)
+
+
+```
+
+### 3
+```{r}
+sat_data = read_delim('INE_PARQUE_VEHICULAR_080219.txt',delim = '|')
+sat_data = sat_data[,-ncol(sat_data)]
+
+head(sat_data)
+```
+
