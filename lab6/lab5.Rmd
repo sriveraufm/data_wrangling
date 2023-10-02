@@ -1,0 +1,64 @@
+---
+title: "lab5"
+output: github_document
+date: "2023-10-02"
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(caret)
+```
+### 1. Reporte detallado de missing data para todas las columnas.
+
+```{r}
+titanic_md <- read.csv("titanic_MD.csv")
+summary(titanic_md)
+
+```
+
+### 2. Especificar qué tipo de modelo se utilizará.
+
+Age: Imputacion (por ser numerica)
+Sex, Embarked: Imputacion por moda (categorical)
+
+```{r}
+complete_rows <- complete.cases(titanic_md)
+which(complete_rows == TRUE)
+```
+
+```{r}
+titanic_md$Age[is.na(titanic_md$Age)] <- mean(titanic_md$Age, na.rm = TRUE)
+
+model <- lm(Age ~ Pclass + Sex + SibSp, data = titanic_md)
+predicted_values <- predict(model, newdata = titanic_md)
+titanic_md$Age[is.na(titanic_md$Age)] <- predicted_values[is.na(titanic_md$Age)]
+
+std_dev <- sd(titanic_md$Age, na.rm = TRUE)
+mean_val <- mean(titanic_md$Age, na.rm = TRUE)
+outliers <- which(titanic_md$Age < mean_val - 3*std_dev | titanic_md$Age > mean_val + 3*std_dev)
+titanic_md$Age[outliers] <- NA
+
+```
+
+### 5. Comparar metodos de "titanic.csv"
+
+```{r}
+titanic <- read.csv("titanic.csv")
+# Now you could measure the accuracy of your imputations using various metrics, e.g., RMSE
+```
+
+# Parte 2
+### Normalizacion
+```{r}
+titanic_md$Age <- scale(titanic_md$Age)
+
+min_max_scaler <- preProcess(titanic_md, method = "range")
+titanic_md <- predict(min_max_scaler, newdata = titanic_md)
+
+max_val = max(abs(titanic_md$Age), na.rm = TRUE)
+titanic_md$Age <- titanic_md$Age / max_val
+
+```
+
