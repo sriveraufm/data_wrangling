@@ -1,0 +1,81 @@
+---
+title: "Untitled"
+output: github_document
+---
+
+```{r}
+library(lubridate)
+library(dplyr)
+library(plotly)
+```
+
+
+```{r}
+data <- read.csv("c1.csv")
+data$factura <- as.numeric(gsub('Q','',data$factura))
+data$Fecha <- dmy(data$Fecha)
+
+```
+
+¿Cuánto debemos crecer para poder llegar a los niveles del 2017?
+```{r}
+utilidad_2017 <- 1 # 1 millon de dolares
+reduccion_2018 <- 0.25
+utilidad_2018 <- utilidad_2017 * (1 - reduccion_2018)
+crecimiento_necesario <- utilidad_2017 / utilidad_2018 - 1
+
+print(paste0('Se necesita un crecimiento de: ', round(crecimiento_necesario*100), '%'))
+
+
+```
+¿Qué estrategias debemos seguir?
+#### Aumentar utilidad
+
+Asumiendo un crecimiento estable, ¿debemos abrir más centros de distribución?
+### Depende de si la capacidad de dustribucion es suficiente para manejar el crecimiento proyectado. Se podria calcular la carga de trabajo vs la demanda proyectada por centro de distribucion.
+
+¿Cuándo podríamos perderle a un mantenimiento y/o reparación?
+No tenemos data de costos para determinar las perdidas.
+
+
+¿Cómo quedó el tarifario en el 2017 por unidad?
+Las tarifas actuales ¿son aceptables por el cliente? ¿Estamos en números rojos?
+```{r}
+promedio_factura <- dplyr::group_by(data, Cod) %>%
+  dplyr::summarise(Promedio = mean(factura, na.rm = TRUE))
+
+print(promedio_factura)
+```
+
+Visualizar el “80-20” de factura (puede variar el porcentaje) y cuáles postes requieren de más mantenimiento.
+No se cumple.
+```{r}
+unique_coords <- unique(data[,c("Lat", "Long")])
+unique_coords$poste <- paste("Poste", 1:nrow(unique_coords))
+data <- merge(data, unique_coords, by=c("Lat", "Long"))
+
+factura_poste <- data %>% 
+  group_by(poste) %>% 
+  summarise(Total_Factura = sum(factura, na.rm=TRUE)) %>%
+  arrange(desc(Total_Factura))
+
+factura_poste$acumulado <- cumsum(factura_poste$Total_Factura)
+
+corte_80 <- sum(factura_poste$Total_Factura) * 0.8
+postes_80 <- factura_poste %>% 
+  filter(acumulado <= corte_80)
+
+ p<- plot_ly(factura_poste, x = ~poste, y = ~Total_Factura, type = 'bar', name = 'Factura') %>%
+  layout(title = "80-20 de Factura por Poste",
+         xaxis = list(title = "Poste"),
+         yaxis = list(title = "Total Factura"),
+         shapes = list(
+           list(type = "line", 
+                x0 = 0.5,
+                x1 = nrow(factura_poste) + 0.5,
+                y0 = corte_80,
+                y1 = corte_80,
+                line = list(dash = "dash", color = "red"))
+         ))
+p
+```
