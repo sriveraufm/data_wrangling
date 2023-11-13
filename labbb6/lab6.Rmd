@@ -1,0 +1,92 @@
+---
+title: "lab6"
+output: github_document
+date: "2023-11-13"
+---
+
+```{r setup, include=FALSE}
+library(stringr)
+```
+
+
+1. 
+```{r cars}
+placas <- c("ABC1234", "XYZ9999", "AAA1111", "123ABCD", "AB12CD3", "abcd1234")
+coincidencias <- str_detect(placas, pattern = "^[A-Z][A-Z][A-Z][0-9][0-9][0-9][0-9]$")
+
+resultados <- data.frame(Placa = placas, EsPlacaValida = coincidencias)
+
+print(resultados)
+
+```
+2. 
+```{r}
+archivos <- c("Ejemplo1.pdf", "prueba2.PDF", "respuestas_del_examen.jpg", "amor.JPG")
+coincidencias <- str_detect(archivos, pattern = ".*\\.(pdf|jpg|PDF|JPG)$")
+resultados <- data.frame(Archivo = archivos, Coincide = coincidencias)
+
+print(resultados)
+
+```
+
+3. 
+```{r}
+contraseñas <- c("Password1!", "abcdEFGH", "1234!", "Abc!defgh", "ABC!defgh")
+
+coincidencias <- str_detect(contraseñas, pattern = "^(?=.*[A-Z])(?=.*[!@#$%^&*()_+])[A-Za-z0-9!@#$%^&*()_+]{8,}$")
+
+resultados <- data.frame(Contraseña = contraseñas, EsValida = coincidencias)
+
+print(resultados)
+
+```
+
+5.
+
+```{r}
+
+texto1 <- c("pit", "spot", "spate", "slaptwo", "respite")
+texto2 <- c("pt", "Pot", "pea‎t", "part")
+
+
+coincidencias1 <- str_detect(texto1, pattern = "\\b[a-z]*[aeiou](?![aeiou])(?![a-z]*r)[a-z]+\\b")
+coincidencias2 <- str_detect(texto2, pattern = "\\b[a-z]*[aeiou](?![aeiou])(?![a-z]*r)[a-z]+\\b")
+
+count_true_texto1 <- sum(coincidencias1)
+count_true_texto2 <- sum(coincidencias2)
+
+
+print(paste("Count in Texto 1:", count_true_texto1, "- Count in Texto 2:", count_true_texto2))
+
+
+```
+
+6.
+```{r}
+numeros_telefonicos <- c("+50254821151", "4210-7640", "52018150", "24346854", "11234569", "50211234578")
+
+regex_numeros_gt <- "(\\+?502)?[2|4-6]([0-9]{3}[- ]?[0-9]{4}|[0-9]{7})"
+#Asumiendo que puede o no tener el 502
+coincidencias <- str_detect(numeros_telefonicos, pattern = regex_numeros_gt)
+
+resultados <- data.frame(Número = numeros_telefonicos, Coincide = coincidencias)
+
+print(resultados)
+
+```
+7. 
+```{r}
+library(stringr)
+
+correos <- c("jsrivera@gmail.com","jsrivera@ufm.edu","estudiante@ufm.edu", "profesor@ufm.edu", "info@ufm.edu", "usuario@gmail.com", "contacto@ufm.com")
+
+regex_correos_ufm <- ".*@ufm\\.edu"
+
+coincidencias <- str_detect(correos, pattern = regex_correos_ufm)
+
+resultados <- data.frame(Correo = correos, Coincide = coincidencias)
+
+print(resultados)
+
+```
+
